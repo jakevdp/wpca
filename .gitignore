@@ -57,3 +57,11 @@ docs/_build/
 
 # PyBuilder
 target/
+
+
+# emacs
+*~
+\#*
+
+# IPython
+.ipynb_checkpoints
