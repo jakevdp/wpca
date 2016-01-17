@@ -2,6 +2,8 @@ from .. import PCA
 import numpy as np
 from numpy.testing import assert_allclose
 
+# TODO: test PCA against sklearn's PCA
+
 def test_pca_transform():
     rand = np.random.RandomState(42)
 
