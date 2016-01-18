@@ -104,9 +104,13 @@ class WPCA(BaseEstimator, TransformerMixin):
     def transform(self, X, weights=None):
         Xtrans = np.zeros((X.shape[0], self.n_components))
         Xmu = X - self.mean_
-        for i in range(X.shape[0]):
-            W2 = np.diag(weights[i] ** 2)
-            Xtrans[i] = np.linalg.solve(P.T @ W2 @ P, P.T @ W2 @ Xmu[i])
+        P = self.components_
+        if weights is None:
+            Xtrans = Xmu @ P.T
+        else:
+            for i in range(X.shape[0]):
+                W2 = np.diag(weights[i] ** 2)
+                Xtrans[i] = np.linalg.solve(P @ W2 @ P.T, P @ W2 @ Xmu[i])
         return Xtrans
 
     def inverse_transform(self, X):
