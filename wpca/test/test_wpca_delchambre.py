@@ -4,9 +4,8 @@ from .. import pca, wpca_delchambre
 
 
 def norm_sign(X):
-    # TODO: this may not work when column sum is zero
-    sgn = np.sign(X.sum(0))
-    sgn[sgn == 0] = 1
+    i_max_abs = np.argmax(abs(X), 0)
+    sgn = np.sign(X[i_max_abs, range(X.shape[1])])
     return X * sgn
 
 
