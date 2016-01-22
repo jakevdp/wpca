@@ -48,8 +48,8 @@ class PCA(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return self.mean_ + X @ self.components_
 
-    def reconstruct(self, X, weights=None):
-        return self.inverse_transform(self.transform(X, weights))
+    def reconstruct(self, X):
+        return self.inverse_transform(self.transform(X))
 
 
 class WPCA(BaseEstimator, TransformerMixin):
