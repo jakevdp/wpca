@@ -83,7 +83,7 @@ class WPCA(BaseEstimator, TransformerMixin):
             assert X.shape == weights.shape
             return (X * weights).sum(0) / weights.sum(0)
 
-    def fit_transform(self, X, weights=None):
+    def _fit(self, X, weights=None, compute_transform=True):
         if self.n_components is None:
             n_components = X.shape[1]
         else:
@@ -91,15 +91,28 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         W = weights.T if weights is not None else weights
         self.mean_ = self._compute_mean(X, weights)
-        P, C, sigma, var_tot = wpca_delchambre((X - self.mean_).T,
-                                               n_components, W=W, xi=self.xi)
+        P, C, sigma, var_tot =\
+            wpca_delchambre((X - self.mean_).T,
+                            n_components, W=W, xi=self.xi,
+                            compute_transform=compute_transform)
         self.components_ = P.T
         self.explained_variance_ = sigma
+
+        # XXX: a weighted covariance matrix is not necessarily
+        # positive-semidefinite, so the variance ratio can rise above 1.
+        # I have no idea what this means, or whether it's a useful concept
+        # in this generalization.
         self.explained_variance_ratio_ = sigma / var_tot
-        return C.T
+
+        if compute_transform:
+            return C.T
+
+    def fit_transform(self, X, weights=None):
+        return self._fit(X, weights, compute_transform=True)
+
 
     def fit(self, X, weights=None):
-        self.fit_transform(X, weights)
+        self._fit(X, weights, compute_transform=False)
         return self
 
     def transform(self, X, weights=None):

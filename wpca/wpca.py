@@ -40,7 +40,7 @@ def pca(X, ncomp):
     return U[:, :ncomp], s[:ncomp, None] * VT[:ncomp], sigma[:ncomp], var_tot
 
 
-def wpca_delchambre(X, ncomp, W=None, xi=0):
+def wpca_delchambre(X, ncomp, W=None, xi=0, compute_transform=True):
     """Weighted Principal Component Analysis
 
     This is a direct implementation of weighted PCA based on the eigenvalue
@@ -58,13 +58,15 @@ def wpca_delchambre(X, ncomp, W=None, xi=0):
         weights associated with the data X
     xi : float (defaut = 0)
         degree of enhancement for weights. Default 0 (no effect)
+    compute_transform : bool (default=True)
+        if True, compute and return transform matrix C
 
     Returns
     -------
     P : ndarray [nvar, ncomp]
         The eigenvectors of the PCA
     C : ndarray [ncomp, nobs]
-        The principal components
+        The principal components (or None if compute_transform is False)
     sigma : ndarray [ncomp]
         The eigenvalues of the covariance
     var_tot : float
@@ -102,12 +104,14 @@ def wpca_delchambre(X, ncomp, W=None, xi=0):
     evals, evecs = linalg.eigh(covar, eigvals=(nvar - ncomp, nvar - 1))
     sigma = evals[::-1]
     P = evecs[:, ::-1]
+    C = None
 
-    # solve for the coefficients
-    # TODO: can this be done more efficiently?
-    C = np.zeros((ncomp, nobs))
-    for i in range(nobs):
-        W2 = np.diag(W[:, i] ** 2)
-        C[:, i] = np.linalg.solve(P.T @ W2 @ P, P.T @ W2 @ X[:, i])
+    if compute_transform:
+        # solve for the coefficients
+        # TODO: can this be done more efficiently?
+        C = np.zeros((ncomp, nobs))
+        for i in range(nobs):
+            W2 = np.diag(W[:, i] ** 2)
+            C[:, i] = np.linalg.solve(P.T @ W2 @ P, P.T @ W2 @ X[:, i])
 
     return P, C, sigma, covar.trace()
