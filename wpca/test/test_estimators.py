@@ -17,27 +17,34 @@ def assert_columns_allclose_upto_sign(A, B, *args, **kwargs):
 def test_vs_sklearn():
     rand = np.random.RandomState(42)
 
-    def check_vs_sklearn(Estimator, n_components, shape):
-        X = rand.randn(*shape)
+    shapes = [(10, 5), (5, 10)]
+    data = {shape: rand.randn(*shape) for shape in shapes}
+
+    def check_transform(Estimator, n_components, shape):
+        X = data[shape]
 
         pca = Estimator(n_components).fit(X)
         skpca = SKPCA(n_components).fit(X)
+        assert_columns_allclose_upto_sign(pca.components_.T,
+                                          skpca.components_.T)
+        assert_allclose(pca.explained_variance_,
+                        skpca.explained_variance_)
+        assert_allclose(pca.explained_variance_ratio_,
+                        skpca.explained_variance_ratio_)
 
         Y = pca.transform(X)
         Ysk = skpca.transform(X)
-
         assert_columns_allclose_upto_sign(Y, Ysk)
-        assert_columns_allclose_upto_sign(pca.components_.T,
-                                          skpca.components_.T)
+        assert_allclose(pca.inverse_transform(Y),
+                        skpca.inverse_transform(Ysk))
 
-    # 10 points in 5 dimensions
-    for shape in [(10, 5), (5, 10)]:
+    for shape in shapes:
         for Estimator in (PCA, WPCA):
-            for n in range(1, 6):
-                yield check_vs_sklearn, Estimator, n, shape
+            for n_components in range(1, 6):
+                yield check_transform, Estimator, n_components, shape
 
 
-def test_pca_transform():
+def test_transform():
     rand = np.random.RandomState(42)
 
     def check_transform(Estimator, n_components, shape):
@@ -54,7 +61,7 @@ def test_pca_transform():
                 yield check_transform, Estimator, n, shape
 
 
-def test_pca_inverse_transform():
+def test_inverse_transform():
     rand = np.random.RandomState(42)
 
     def check_inverse_transform(Estimator, n_components, shape):

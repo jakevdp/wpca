@@ -26,14 +26,18 @@ def pca(X, ncomp):
         The principal components
     sigma : ndarray [ncomp]
         The eigenvalues of the covariance
+    var_tot : float
+        Total variance: i.e. sum of all eigenvalues
 
     Notes
     -----
-    dot(P, C) is the best approximation to the input X
+    dot(P, C) is the best approximation to the input X.
     """
     nvar, nobs = X.shape
     U, s, VT = np.linalg.svd(X, full_matrices=False)
-    return U[:, :ncomp], s[:ncomp, None] * VT[:ncomp], s[:ncomp] ** 2 / nobs
+    sigma = s ** 2 / nobs
+    var_tot = sigma.sum()
+    return U[:, :ncomp], s[:ncomp, None] * VT[:ncomp], sigma[:ncomp], var_tot
 
 
 def wpca_delchambre(X, ncomp, W=None, xi=0):
@@ -63,9 +67,13 @@ def wpca_delchambre(X, ncomp, W=None, xi=0):
         The principal components
     sigma : ndarray [ncomp]
         The eigenvalues of the covariance
+    var_tot : float
+        Total variance: i.e. sum of all eigenvalues
 
     Notes
     -----
+    dot(P, C) is the best approximation to the input X.
+
     Although Delchambre (2014) suggests an iterative power method, this
     iteration is not essential to the algorithm. Fundamentally the algorithm
     is simply finding the standard eigenvectors of the weighted covariance
@@ -102,4 +110,4 @@ def wpca_delchambre(X, ncomp, W=None, xi=0):
         W2 = np.diag(W[:, i] ** 2)
         C[:, i] = np.linalg.solve(P.T @ W2 @ P, P.T @ W2 @ X[:, i])
 
-    return P, C, sigma
+    return P, C, sigma, covar.trace()

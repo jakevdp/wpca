@@ -32,10 +32,10 @@ class PCA(BaseEstimator, TransformerMixin):
         else:
             n_components = self.n_components
         self.mean_ = self._compute_mean(X)
-        P, C, sigma = pca((X - self.mean_).T,
-                          n_components)
+        P, C, sigma, var_tot = pca((X - self.mean_).T, n_components)
         self.components_ = P.T
         self.explained_variance_ = sigma
+        self.explained_variance_ratio_ = sigma / var_tot
         return C.T
 
     def fit(self, X):
@@ -91,10 +91,11 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         W = weights.T if weights is not None else weights
         self.mean_ = self._compute_mean(X, weights)
-        P, C, sigma = wpca_delchambre((X - self.mean_).T,
-                                      n_components, W=W, xi=self.xi)
+        P, C, sigma, var_tot = wpca_delchambre((X - self.mean_).T,
+                                               n_components, W=W, xi=self.xi)
         self.components_ = P.T
         self.explained_variance_ = sigma
+        self.explained_variance_ratio_ = sigma / var_tot
         return C.T
 
     def fit(self, X, weights=None):
