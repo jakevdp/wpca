@@ -71,9 +71,10 @@ class WPCA(BaseEstimator, TransformerMixin):
     .. [1] Delchambre, L. MNRAS 2014 446 (2): 3545-3555 (2014)
            http://arxiv.org/abs/1412.4533
     """
-    def __init__(self, n_components=None, xi=0):
+    def __init__(self, n_components=None, xi=0, regularize=False):
         self.n_components = n_components
         self.xi = xi
+        self.regularize = regularize
 
     @staticmethod
     def _compute_mean(X, weights):
@@ -94,7 +95,8 @@ class WPCA(BaseEstimator, TransformerMixin):
         P, C, sigma, var_tot =\
             wpca_delchambre((X - self.mean_).T,
                             n_components, W=W, xi=self.xi,
-                            compute_transform=compute_transform)
+                            compute_transform=compute_transform,
+                            regularize=self.regularize)
         self.components_ = P.T
         self.explained_variance_ = sigma
 
@@ -110,7 +112,6 @@ class WPCA(BaseEstimator, TransformerMixin):
     def fit_transform(self, X, weights=None):
         return self._fit(X, weights, compute_transform=True)
 
-
     def fit(self, X, weights=None):
         self._fit(X, weights, compute_transform=False)
         return self
@@ -124,7 +125,12 @@ class WPCA(BaseEstimator, TransformerMixin):
         else:
             for i in range(X.shape[0]):
                 W2 = np.diag(weights[i] ** 2)
-                Xtrans[i] = np.linalg.solve(P @ W2 @ P.T, P @ W2 @ Xmu[i])
+                if self.regularize:
+                    PWP = P @ W2 @ P.T + np.diag(X.shape[0] /
+                                                 self.explained_variance_)
+                else:
+                    PWP = P @ W2 @ P.T
+                Xtrans[i] = np.linalg.solve(PWP, P @ W2 @ Xmu[i])
         return Xtrans
 
     def inverse_transform(self, X):

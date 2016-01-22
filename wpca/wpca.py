@@ -40,7 +40,8 @@ def pca(X, ncomp):
     return U[:, :ncomp], s[:ncomp, None] * VT[:ncomp], sigma[:ncomp], var_tot
 
 
-def wpca_delchambre(X, ncomp, W=None, xi=0, compute_transform=True):
+def wpca_delchambre(X, ncomp, W=None, xi=0, compute_transform=True,
+                    regularize=False):
     """Weighted Principal Component Analysis
 
     This is a direct implementation of weighted PCA based on the eigenvalue
@@ -60,6 +61,8 @@ def wpca_delchambre(X, ncomp, W=None, xi=0, compute_transform=True):
         degree of enhancement for weights. Default 0 (no effect)
     compute_transform : bool (default=True)
         if True, compute and return transform matrix C
+    regularize : bool
+        [TODO]
 
     Returns
     -------
@@ -112,6 +115,10 @@ def wpca_delchambre(X, ncomp, W=None, xi=0, compute_transform=True):
         C = np.zeros((ncomp, nobs))
         for i in range(nobs):
             W2 = np.diag(W[:, i] ** 2)
-            C[:, i] = np.linalg.solve(P.T @ W2 @ P, P.T @ W2 @ X[:, i])
+            if regularize:
+                PWP = P.T @ W2 @ P + np.diag(X.shape[0] / sigma)
+            else:
+                PWP = P.T @ W2 @ P
+            C[:, i] = np.linalg.solve(PWP, P.T @ W2 @ X[:, i])
 
     return P, C, sigma, covar.trace()
