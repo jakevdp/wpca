@@ -73,3 +73,25 @@ def test_inverse_transform():
     for shape in [(10, 5), (5, 10)]:
         for Estimator in (PCA, WPCA):
             yield check_inverse_transform, Estimator, min(shape), shape
+
+
+def test_with_outliers():
+    rand = np.random.RandomState(0)
+    X = rand.multivariate_normal([0, 0], [[12, 6],[6, 5]], size=1000)
+    pca = WPCA(2).fit(X)
+
+    def check_results(n_outliers, noise_level, rtol):
+        i = rand.randint(0, 100, size=n_outliers)
+        j = rand.randint(0, 2, size=n_outliers)
+        X2 = X.copy()
+        X2[i, j] += noise_level * rand.randn(n_outliers)
+        W2 = np.ones_like(X2)
+        W2[i, j] = 1. / noise_level
+
+        pca2 = WPCA(2).fit(X2, W2)
+        assert_columns_allclose_upto_sign(pca.components_.T,
+                                          pca2.components_.T,
+                                          rtol=rtol)
+
+    for (n_outliers, noise_level, rtol) in [(1, 20, 1E-3), (10, 20, 1E-2)]:
+        yield check_results, n_outliers, noise_level, rtol
