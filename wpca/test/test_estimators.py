@@ -101,3 +101,29 @@ def test_with_outliers():
 
     for (n_outliers, noise_level, rtol) in [(1, 20, 1E-3), (10, 20, 1E-2)]:
         yield check_results, n_outliers, noise_level, rtol
+
+
+def test_with_nans():
+    rand = np.random.RandomState(0)
+    X = rand.rand(100, 10)
+
+    i = rand.randint(0, 100, size=100)
+    j = rand.randint(0, 2, size=100)
+    X[i, j] = 0
+    W = np.ones_like(X)
+    W[i, j] = 0
+
+    X2 = X.copy()
+    X2[i, j] = np.nan
+
+    pca1 = WPCA(2).fit(X, W)
+    pca2 = WPCA(2).fit(X2, W)
+    assert_columns_allclose_upto_sign(pca1.components_.T, pca2.components_.T)
+
+    Y1 = pca1.transform(X, W)
+    Y2 = pca2.transform(X2, W)
+    assert_columns_allclose_upto_sign(Y1, Y2)
+
+    Z1 = pca1.reconstruct(X, W)
+    Z2 = pca2.reconstruct(X2, W)
+    assert_allclose(Z1, Z2)

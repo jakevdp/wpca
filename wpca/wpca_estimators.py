@@ -132,6 +132,11 @@ class PCA(BaseEstimator, TransformerMixin):
         """
         return self.inverse_transform(self.transform(X))
 
+    def fit_reconstruct(self, X):
+        """TODO
+        """
+        return self.inverse_transform(self.fit_transform(X))
+
 
 class WPCA(BaseEstimator, TransformerMixin):
     """Weighted Principal Component Analysis
@@ -209,11 +214,18 @@ class WPCA(BaseEstimator, TransformerMixin):
             self.mean_ = X.mean(0)
             weights = np.ones_like(X)
         else:
-            self.mean_ = (X * weights).sum(0) / weights.sum(0)
+            XW = X * weights
+            # handle NaN values
+            XW[weights == 0] = 0
+            self.mean_ = XW.sum(0) / weights.sum(0)
 
         # TODO: check for NaN and filter warnings
         Ws = weights.sum(0)
         XW = (X - self.mean_) * weights
+
+        # Handle NaNs in XW
+        XW[weights == 0] = 0
+
         covar = np.dot(XW.T, XW) / np.dot(weights.T, weights)
         if self.xi != 0:
             covar *= np.outer(Ws, Ws) ** self.xi
@@ -250,9 +262,13 @@ class WPCA(BaseEstimator, TransformerMixin):
             weights = np.ones_like(X)
         Y = np.zeros((X.shape[0], self.components_.shape[0]))
         for i in range(X.shape[0]):
-            W2 = weights[i] ** 2
-            cWc = np.dot(self.components_ * W2, self.components_.T)
-            cWX = np.dot(self.components_ * W2, X[i] - self.mean_)
+            cW = self.components_ * weights[i]
+            WX = (X[i] - self.mean_) * weights[i]
+            # handle NaN values in X
+            WX[weights[i] == 0] = 0
+
+            cWc = np.dot(cW, cW.T)
+            cWX = np.dot(cW, WX)
             if self.regularization is not None:
                 cWc += np.diag(self.regularization / self.explained_variance_)
             Y[i] = np.linalg.solve(cWc, cWX)
@@ -313,3 +329,8 @@ class WPCA(BaseEstimator, TransformerMixin):
             Reconstructed version of X
         """
         return self.inverse_transform(self.transform(X, weights))
+
+    def fit_reconstruct(self, X, weights=None):
+        """TODO
+        """
+        return self.inverse_transform(self.fit_transform(X, weights))
