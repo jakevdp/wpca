@@ -58,11 +58,11 @@ class PCA(BaseEstimator, TransformerMixin):
 
         self.mean_ = X.mean(0)
         U, s, VT = np.linalg.svd(X - self.mean_)
-        self.components_ = VT[:self.n_components]
+        self.components_ = VT[:n_components]
         var = s ** 2 / X.shape[0]
         self.explained_variance_ = var[:self.n_components]
-        self.explained_variance_ratio_ = var[:self.n_components] / var.sum()
-        return s[:self.n_components] * U[:, :self.n_components]
+        self.explained_variance_ratio_ = var[:n_components] / var.sum()
+        return s[:n_components] * U[:, :n_components]
 
     def fit(self, X):
         """Compute principal components for X
@@ -148,8 +148,9 @@ class WPCA(BaseEstimator, TransformerMixin):
     xi : float (optional)
         Degree of weight enhancement.
 
-    regularize : boolean (default=False)
-        If True, use ridge regularization when computing the transform.
+    regularization : float (optional)
+        Control the strength of ridge regularization used to compute the
+        transform.
 
     Attributes
     ----------
@@ -176,10 +177,10 @@ class WPCA(BaseEstimator, TransformerMixin):
     .. [1] Delchambre, L. MNRAS 2014 446 (2): 3545-3555 (2014)
            http://arxiv.org/abs/1412.4533
     """
-    def __init__(self, n_components=None, xi=0, regularize=False):
+    def __init__(self, n_components=None, xi=0, regularization=None):
         self.n_components = n_components
         self.xi = xi
-        self.regularize = regularize
+        self.regularization = regularization
 
     def fit(self, X, weights=None):
         """Compute principal components for X
@@ -252,8 +253,8 @@ class WPCA(BaseEstimator, TransformerMixin):
             W2 = weights[i] ** 2
             cWc = np.dot(self.components_ * W2, self.components_.T)
             cWX = np.dot(self.components_ * W2, X[i] - self.mean_)
-            if self.regularize:
-                cWc += np.diag(X.shape[0] / self.explained_variance_)
+            if self.regularization is not None:
+                cWc += np.diag(self.regularization / self.explained_variance_)
             Y[i] = np.linalg.solve(cWc, cWX)
         return Y
 
