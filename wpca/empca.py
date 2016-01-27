@@ -1,11 +1,11 @@
 import numpy as np
 from numpy.testing import assert_allclose
 
+
 def orthonormalize(X, rows=True):
-    if rows: X = X.T
-    Q, R = np.linalg.qr(X)
-    if rows: Q = Q.T
-    return Q
+    orient = lambda X: X.T if rows else X
+    Q, R = np.linalg.qr(orient(X))
+    return orient(Q)
 
 
 def random_orthonormal(n_samples, n_features, rseed=None):
@@ -16,30 +16,37 @@ def random_orthonormal(n_samples, n_features, rseed=None):
 
 
 def solve_weighted(A, b, w):
-    """solve Ax = b with weights w"""
+    """solve Ax = b with weights w
+
+    Parameters
+    ----------
+    A : array-like [N, M]
+    b : array-like [N]
+    w : array-like [N]
+
+    Returns
+    -------
+    x : ndarray, [M]
+    """
+    A, b, w = map(np.asarray, (A, b, w))
     return np.linalg.solve(np.dot(A.T * w ** 2, A),
                            np.dot(A.T * w ** 2, b))
 
 
 def _Estep(eigvec, data, weights, coeff):
+    # Update coeff
     for i in range(data.shape[0]):
         coeff[i] = solve_weighted(eigvec.T, data[i], weights[i])
-    return coeff
 
 
 def _Mstep(eigvec, data, weights, coeff):
-    data = data.copy()
+    # Update eigvec
+    w2 = weights ** 2
     for i in range(eigvec.shape[0]):
-        c = coeff[:, i]
-        for j in range(data.shape[1]):
-            w = weights[:, j]
-            x = data[:, j]
-            eigvec[i, j] = np.dot(x, w ** 2 * c) / np.dot(c, w ** 2 * c)
-
-        # remove this vector from the data
-        data -= np.outer(coeff[:, i], eigvec[i])
-
-    return orthonormalize(eigvec)
+        d = data - np.dot(coeff[:, :i], eigvec[:i])
+        c = coeff[:, i:i + 1]
+        eigvec[i] = np.dot(c.T, w2 * d) / np.dot(c.T, w2 * c)
+        eigvec[:i + 1] = orthonormalize(eigvec[: i + 1])
 
 
 def empca(data, weights, nvec, niter=25, rseed=None):
@@ -49,9 +56,9 @@ def empca(data, weights, nvec, niter=25, rseed=None):
     coeff = np.zeros((data.shape[0], nvec))
 
     for k in range(niter):
-        coeff = _Estep(eigvec, data, weights, coeff)
-        eigvec = _Mstep(eigvec, data, weights, coeff)
-    coeff = _Estep(eigvec, data, weights, coeff)
+        _Estep(eigvec, data, weights, coeff)
+        _Mstep(eigvec, data, weights, coeff)
+    _Estep(eigvec, data, weights, coeff)
 
     return eigvec, coeff
 
