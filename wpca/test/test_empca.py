@@ -34,7 +34,7 @@ def test_empca_vs_pca():
     rand = np.random.RandomState(42)
     X = rand.randn(50, 5)
     W = np.ones_like(X)
-    evecs1, coeff1 = empca(X, W, 5, niter=100)
+    evecs1, coeff1 = empca(X, W, 5, niter=100, rseed=42)
     evecs2, coeff2 = pca(X, 5)
 
     assert_columns_allclose_upto_sign(evecs1.T, evecs2.T, rtol=1E-6)
