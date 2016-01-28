@@ -2,6 +2,8 @@
 
 *Author: Jake VanderPlas*
 
+[![build status](http://img.shields.io/travis/jakevdp/wpca/master.svg?style=flat)](https://travis-ci.org/jakevdp/wpca)
+
 This repository contains several implementations of Weighted Principal Component
 Analysis, using a very similar interface to scikit-learn's
 [``sklearn.decomposition.PCA``](http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html):
