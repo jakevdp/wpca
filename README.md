@@ -1,7 +1,9 @@
 # Weighted Principal Component Analysis in Python
 
+*Author: Jake VanderPlas*
+
 This repository contains several implementations of Weighted Principal Component
-Analysis, using the same interface as scikit-learn's
+Analysis, using a very similar interface to scikit-learn's
 [``sklearn.decomposition.PCA``](http://scikit-learn.org/):
 
 - ``wpca.WPCA`` uses a direct decomposition of a weighted covariance matrix to
@@ -10,8 +12,8 @@ Analysis, using the same interface as scikit-learn's
   in [Delchambre (2104)](http://arxiv.org/abs/1412.4533)
 
 - ``wpca.EMPCA`` uses an iterative expectation-maximization approach to solve
-  simultaneously for the principal vectors and principal components. It is
-  based on the algorithm presented in
+  simultaneously for the principal vectors and principal components of
+  weighted data. It is based on the algorithm presented in
   [Bailey (2012)](http://arxiv.org/abs/1208.4122).
 
 - ``wpca.PCA`` is a standard non-weighted PCA implemented using the singular
@@ -27,10 +29,10 @@ For an example application of a weighted PCA approach, See
 This package has the following requirements:
 
 - Python versions 2.6-2.7, or 3.3-3.5
-- [numpy](http://numpy.org) (tested with version 1.10)
-- [scipy](http://scipy.org) (tested with version 0.16)
-- [scikit-learn](http://scikit-learn.org) (tested with version 0.17)
-- [nose](http://nosetests.readthedocs.org) (optional) to run unit tests.
+- [numpy](http://numpy.org/) (tested with version 1.10)
+- [scipy](http://scipy.org/) (tested with version 0.16)
+- [scikit-learn](http://scikit-learn.org/) (tested with version 0.17)
+- [nose](http://nose.readthedocs.org/) (optional) to run unit tests.
 
 With these requirements satisfied, you can install this package by running
 ```

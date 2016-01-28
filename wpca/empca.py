@@ -93,7 +93,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
         X_new : array-like, shape (n_samples, n_components)
         """
         if self.n_components is None:
-            n_components = min(X.shape)
+            n_components = X.shape[1]
         else:
             n_components = self.n_components
 

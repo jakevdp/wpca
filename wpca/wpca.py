@@ -72,7 +72,7 @@ class WPCA(BaseEstimator, TransformerMixin):
             Returns the instance itself.
         """
         if self.n_components is None:
-            n_components = min(X.shape)
+            n_components = X.shape[1]
         else:
             n_components = self.n_components
 

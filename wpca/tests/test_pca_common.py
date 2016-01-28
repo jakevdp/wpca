@@ -21,6 +21,22 @@ DATA = {shape: rand.randn(*shape) for shape in SHAPES}
 #        yield check_estimator, Estimator
 
 
+def test_components_None():
+    def check_components(Estimator, shape):
+        X = DATA[shape]
+
+        pca = Estimator(**KWDS[Estimator]).fit(X)
+        skpca = SKPCA().fit(X)
+
+        assert_columns_allclose_upto_sign(pca.components_.T,
+                                          skpca.components_.T)
+
+    for Estimator in ESTIMATORS:
+        for shape in SHAPES:
+            if shape[0] > shape[1]:
+                yield check_components, Estimator, shape
+
+
 def test_components_vs_sklearn():
     def check_components(Estimator, n_components, shape):
         X = DATA[shape]
