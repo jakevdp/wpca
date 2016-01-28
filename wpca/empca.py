@@ -124,9 +124,12 @@ class EMPCA(BaseEstimator, TransformerMixin):
         self.components_ = eigvec
         self.explained_variance_ = (coeff ** 2).sum(0) / X.shape[0]
 
-        # TODO: correctly handle weighted variance here?
-        self.explained_variance_ratio_ = (self.explained_variance_
-                                          / X_c.var(0).sum())
+        if weights is None:
+            total_var = X_c.var(0).sum()
+        else:
+            XW = X_c * weights
+            total_var = np.sum((XW ** 2).sum(0) / (weights ** 2).sum(0))
+        self.explained_variance_ratio_ = (self.explained_variance_ / total_var)
         return coeff
 
     def fit(self, X, y=None, weights=None):
