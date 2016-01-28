@@ -30,7 +30,7 @@ For an example application of a weighted PCA approach, See
 
 This package has the following requirements:
 
-- Python versions 2.6-2.7, or 3.3-3.5
+- Python versions 2.7, or 3.4+
 - [numpy](http://numpy.org/) (tested with version 1.10)
 - [scipy](http://scipy.org/) (tested with version 0.16)
 - [scikit-learn](http://scikit-learn.org/) (tested with version 0.17)
