@@ -55,13 +55,13 @@ class EMPCA(BaseEstimator, TransformerMixin):
         """
         if weights is None:
             self.mean_ = X.mean(0)
+            X_c = X - self.mean_
         else:
             XW = X * weights
-            # handle NaN values
             XW[weights == 0] = 0
             self.mean_ = XW.sum(0) / weights.sum(0)
-
-        X_c = X - self.mean_
+            X_c = X - self.mean_
+            X_c[weights == 0] = 0
 
         eigvec = random_orthonormal(self.n_components, X.shape[1],
                                     random_state=self.random_state)
@@ -73,8 +73,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
         coeff = self._Estep(X_c, weights, eigvec)
 
         self.components_ = eigvec
-        self.explained_variance_ = (np.dot(coeff.T, coeff).diagonal()
-                                    / X.shape[0])
+        self.explained_variance_ = (coeff ** 2).sum(0) / X.shape[0]
         self.explained_variance_ratio_ = (self.explained_variance_
                                           / X_c.var(0).sum())
         return coeff
@@ -120,7 +119,10 @@ class EMPCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
-        return self._Estep(X - self.mean_, weights, self.components_)
+        X_c = X - self.mean_
+        if weights is not None:
+            X_c[weights == 0] = 0
+        return self._Estep(X_c, weights, self.components_)
 
     def inverse_transform(self, X):
         """Transform data back to its original space.
