@@ -4,7 +4,7 @@
 
 This repository contains several implementations of Weighted Principal Component
 Analysis, using a very similar interface to scikit-learn's
-[``sklearn.decomposition.PCA``](http://scikit-learn.org/):
+[``sklearn.decomposition.PCA``](http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html):
 
 - ``wpca.WPCA`` uses a direct decomposition of a weighted covariance matrix to
   compute principal vectors, and then a weighted least squares optimization
