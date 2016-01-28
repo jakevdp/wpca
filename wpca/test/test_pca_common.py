@@ -92,6 +92,7 @@ def test_pca_reconstruct():
 
         pca = Estimator(n_components=min(shape))
 
+        assert_allclose(X, pca.fit(X).reconstruct(X))
         assert_allclose(X, pca.fit_reconstruct(X))
 
     for Estimator in ESTIMATORS:

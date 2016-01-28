@@ -40,5 +40,14 @@ def test_weighted_vs_unweighted():
         X2 = pca2.inverse_transform(Y2)
         assert_allclose(X1, X2)
 
+        assert_columns_allclose_upto_sign(pca1.fit_transform(X),
+                                          pca2.fit_transform(X, W))
+                                          
+        assert_allclose(pca1.reconstruct(X),
+                        pca2.reconstruct(X, W))
+
+        assert_allclose(pca1.fit_reconstruct(X),
+                        pca2.fit_reconstruct(X, W))
+
     for Estimator in ESTIMATORS:
         yield check_results, Estimator

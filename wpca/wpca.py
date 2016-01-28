@@ -191,7 +191,7 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         Returns
         -------
-        X_reconstructed : array-like, shape (n_samples, n_components)
+        X_reconstructed : ndarray, shape (n_samples, n_components)
             Reconstructed version of X
         """
         return self.inverse_transform(self.transform(X, weights))
@@ -213,7 +213,7 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         Returns
         -------
-        X_reconstructed : array-like, shape (n_samples, n_components)
+        X_reconstructed : ndarray, shape (n_samples, n_components)
             Reconstructed version of X
         """
         return self.inverse_transform(self.fit_transform(X, weights))
