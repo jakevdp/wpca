@@ -131,6 +131,19 @@ class PCA(BaseEstimator, TransformerMixin):
         return self.inverse_transform(self.transform(X))
 
     def fit_reconstruct(self, X):
-        """TODO
+        """Fit the model and reconstruct the data using the PCA model
+
+        This is equivalent to calling fit_transform()
+        followed by inverse_transform().
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_components)
+            Data in transformed representation.
+
+        Returns
+        -------
+        X_reconstructed : array-like, shape (n_samples, n_components)
+            Reconstructed version of X
         """
         return self.inverse_transform(self.fit_transform(X))

@@ -160,67 +160,23 @@ class EMPCA(BaseEstimator, TransformerMixin):
         return self.inverse_transform(self.transform(X, weights))
 
     def fit_reconstruct(self, X, weights=None):
-        """TODO
+        """Fit the model and reconstruct the data using the PCA model
+
+        This is equivalent to calling fit_transform()
+        followed by inverse_transform().
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_components)
+            Data in transformed representation.
+
+        weights: array-like, shape (n_samples, n_features)
+            Non-negative weights encoding the reliability of each measurement.
+            Equivalent to the inverse of the Gaussian errorbar.
+
+        Returns
+        -------
+        X_reconstructed : array-like, shape (n_samples, n_components)
+            Reconstructed version of X
         """
         return self.inverse_transform(self.fit_transform(X, weights))
-
-
-def _Estep(eigvec, data, weights, coeff):
-    """E-step for Expectation Maximization PCA"""
-    # Update coeff
-    for i in range(data.shape[0]):
-        coeff[i] = solve_weighted(eigvec.T, data[i], weights[i])
-    return coeff
-
-
-def _Mstep(eigvec, data, weights, coeff):
-    """M-step for Expectation Maximization PCA"""
-    # Update eigvec
-    w2 = weights ** 2
-    for i in range(eigvec.shape[0]):
-        # remove contribution of previous eigenvectors from data
-        d = data - np.dot(coeff[:, :i], eigvec[:i])
-        c = coeff[:, i:i + 1]
-        eigvec[i] = np.dot(c.T, w2 * d) / np.dot(c.T, w2 * c)
-        # orthonormalize computed vectors: in theory not necessary,
-        # but numerically it's a good idea
-        # TODO: perhaps do this more efficiently?
-        eigvec[:i + 1] = orthonormalize(eigvec[:i + 1])
-    return eigvec
-
-
-def empca(data, weights, nvec, niter=25, random_state=None):
-    """Expectation-Maximization weighted PCA
-
-    This computes an iterative weighted PCA of the data
-    using the method of Bailey (2012) [1]_.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    References
-    ----------
-    .. [1] Bailey, S. PASP (2014)
-           http://arxiv.org/abs/1208.4122
-    """
-    assert data.shape == weights.shape
-    assert nvec <= data.shape[1]
-    eigvec = random_orthonormal(nvec, data.shape[1],
-                                random_state=random_state)
-    coeff = np.zeros((data.shape[0], nvec))
-
-    for k in range(niter):
-        _Estep(eigvec, data, weights, coeff)
-        _Mstep(eigvec, data, weights, coeff)
-    _Estep(eigvec, data, weights, coeff)
-
-    return eigvec, coeff
-
-
-def pca(data, nvec):
-    """Standard PCA using Singular Value Decomposition"""
-    U, s, VT = np.linalg.svd(data)
-    return VT[:, :nvec], U[:, :nvec] * s[:nvec]

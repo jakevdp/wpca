@@ -197,6 +197,23 @@ class WPCA(BaseEstimator, TransformerMixin):
         return self.inverse_transform(self.transform(X, weights))
 
     def fit_reconstruct(self, X, weights=None):
-        """TODO
+        """Fit the model and reconstruct the data using the PCA model
+
+        This is equivalent to calling fit_transform()
+        followed by inverse_transform().
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_components)
+            Data in transformed representation.
+
+        weights: array-like, shape (n_samples, n_features)
+            Non-negative weights encoding the reliability of each measurement.
+            Equivalent to the inverse of the Gaussian errorbar.
+
+        Returns
+        -------
+        X_reconstructed : array-like, shape (n_samples, n_components)
+            Reconstructed version of X
         """
         return self.inverse_transform(self.fit_transform(X, weights))
