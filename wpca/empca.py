@@ -5,14 +5,55 @@ from .utils import orthonormalize, random_orthonormal, solve_weighted
 
 
 class EMPCA(BaseEstimator, TransformerMixin):
-    """Expectation-Maximization PCA"""
+    """Expectation-Maximization PCA
+
+    This is an iterative implementation of weighted PCA based on an
+    Expectation-Maximization approach, following Bailey (2012) [1]_.
+
+    Parameters
+    ----------
+    n_components : int (optional)
+        Number of components to keep. If not specified, all components are kept
+
+    max_iter : int (default=100)
+        Maximum number of Expectation-Maximization iterations
+
+    random_state : int or None
+        Seed for the random initialization of eigenvectors
+
+    Attributes
+    ----------
+    components_ : array, [n_components, n_features]
+        Principal axes in feature space, representing the directions of
+        maximum variance in the data.
+
+    explained_variance_ : array, [n_components]
+        The amount of variance explained by each of the selected components.
+
+    explained_variance_ratio_ : array, [n_components]
+        Percentage of variance explained by each of the selected components.
+
+    mean_ : array, [n_features]
+        Per-feature empirical mean, estimated from the training set.
+
+    See Also
+    --------
+    - PCA
+    - WPCA
+    - sklearn.decomposition.PCA
+
+    References
+    ----------
+    .. [1] Bailey, S. PASP 124:919 (2012)
+           http://arxiv.org/abs/1208.4122
+    """
     def __init__(self, n_components=None, max_iter=100, random_state=None):
         self.n_components = n_components
         self.max_iter = max_iter
         self.random_state = random_state
 
     def _Estep(self, data, weights, eigvec):
-        """E-step:: update coeff"""
+        """E-step: solve for coeff given eigvec"""
         if weights is None:
             return np.dot(data, eigvec.T)
         else:
@@ -20,11 +61,9 @@ class EMPCA(BaseEstimator, TransformerMixin):
                              for i in range(data.shape[0])])
 
     def _Mstep(self, data, weights, eigvec, coeff):
-        """M-step: update eigvec"""
-        if weights is None:
-            w2 = 1
-        else:
-            w2 = weights ** 2
+        """M-step: solve for eigvec given coeff"""
+        w2 = 1 if weights is None else weights ** 2
+
         for i in range(eigvec.shape[0]):
             # remove contribution of previous eigenvectors from data
             d = data - np.dot(coeff[:, :i], eigvec[:i])
@@ -53,17 +92,23 @@ class EMPCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
+        if self.n_components is None:
+            n_components = min(X.shape)
+        else:
+            n_components = self.n_components
+
         if weights is None:
             self.mean_ = X.mean(0)
             X_c = X - self.mean_
         else:
+            assert X.shape == weights.shape
             XW = X * weights
             XW[weights == 0] = 0
             self.mean_ = XW.sum(0) / weights.sum(0)
             X_c = X - self.mean_
             X_c[weights == 0] = 0
 
-        eigvec = random_orthonormal(self.n_components, X.shape[1],
+        eigvec = random_orthonormal(n_components, X.shape[1],
                                     random_state=self.random_state)
 
         # TODO: add a convergence check
@@ -74,6 +119,8 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         self.components_ = eigvec
         self.explained_variance_ = (coeff ** 2).sum(0) / X.shape[0]
+        
+        # TODO: correctly handle weighted variance here?
         self.explained_variance_ratio_ = (self.explained_variance_
                                           / X_c.var(0).sum())
         return coeff
@@ -121,6 +168,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
         """
         X_c = X - self.mean_
         if weights is not None:
+            assert X.shape == weights.shape
             X_c[weights == 0] = 0
         return self._Estep(X_c, weights, self.components_)
 

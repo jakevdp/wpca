@@ -7,6 +7,7 @@ from .tools import assert_columns_allclose_upto_sign
 
 ESTIMATORS = [PCA, WPCA, EMPCA]
 KWDS = {PCA:{}, WPCA:{}, EMPCA:{'random_state':0}}
+N_COMPONENTS = range(1, 6)
 SHAPES = [(10, 5), (6, 10)]
 rand = np.random.RandomState(42)
 DATA = {shape: rand.randn(*shape) for shape in SHAPES}
@@ -24,7 +25,7 @@ def test_components_vs_sklearn():
 
     for Estimator in ESTIMATORS:
         for shape in SHAPES:
-            for n_components in range(1, 6):
+            for n_components in N_COMPONENTS:
                 yield check_components, Estimator, n_components, shape
 
 
@@ -42,7 +43,7 @@ def test_explained_variance_vs_sklearn():
 
     for Estimator in ESTIMATORS:
         for shape in SHAPES:
-            for n_components in range(1, 6):
+            for n_components in N_COMPONENTS:
                 yield check_explained_variance, Estimator, n_components, shape
 
 
@@ -59,7 +60,7 @@ def test_transform_vs_sklearn():
 
     for Estimator in ESTIMATORS:
         for shape in SHAPES:
-            for n_components in range(1, 6):
+            for n_components in N_COMPONENTS:
                 yield check_transform, Estimator, n_components, shape
 
 
@@ -74,7 +75,7 @@ def test_transform_vs_fit_transform():
 
     for Estimator in ESTIMATORS:
         for shape in SHAPES:
-            for n_components in range(1, 6):
+            for n_components in N_COMPONENTS:
                 yield check_transform, Estimator, n_components, shape
 
 

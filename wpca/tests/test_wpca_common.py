@@ -9,7 +9,7 @@ ESTIMATORS = [WPCA, EMPCA]
 KWDS = {WPCA:{}, EMPCA:{'random_state':0}}
 
 
-def test_weighted_vs_unweighted():
+def test_constant_weights():
     rand = np.random.RandomState(0)
     X = rand.multivariate_normal([0, 0], [[12, 6],[6, 5]], size=100)
     W = np.ones_like(X)
@@ -45,7 +45,7 @@ def test_weighted_vs_unweighted():
         yield check_results, Estimator
 
 
-def test_wpca_with_outliers():
+def test_outlier_weights():
     rand = np.random.RandomState(0)
     X = rand.multivariate_normal([0, 0], [[12, 6],[6, 5]], size=1000)
     pca = PCA(2).fit(X)
@@ -68,7 +68,7 @@ def test_wpca_with_outliers():
             yield check_results, Estimator, n_outliers, noise_level, rtol
 
 
-def test_wpca_with_nans():
+def test_nan_weights():
     rand = np.random.RandomState(0)
     X = rand.rand(100, 10)
 
@@ -86,6 +86,10 @@ def test_wpca_with_nans():
         pca2 = Estimator(2, **KWDS[Estimator]).fit(X2, W)
         assert_columns_allclose_upto_sign(pca1.components_.T,
                                           pca2.components_.T)
+        assert_allclose(pca1.explained_variance_,
+                        pca2.explained_variance_)
+        assert_allclose(pca1.explained_variance_ratio_,
+                        pca2.explained_variance_ratio_)
 
         Y1 = pca1.transform(X, W)
         Y2 = pca2.transform(X2, W)
@@ -96,8 +100,4 @@ def test_wpca_with_nans():
         assert_allclose(Z1, Z2)
 
     for Estimator in ESTIMATORS:
-        if Estimator is EMPCA:
-            kwds = dict(random_state=0)
-        else:
-            kwds = {}
         yield check_results, Estimator
