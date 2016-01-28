@@ -16,7 +16,7 @@ def test_constant_weights():
 
     def check_results(Estimator):
         pca1 = Estimator(2, **KWDS[Estimator]).fit(X)
-        pca2 = Estimator(2, **KWDS[Estimator]).fit(X, W)
+        pca2 = Estimator(2, **KWDS[Estimator]).fit(X, weights=W)
         assert_columns_allclose_upto_sign(pca1.components_.T,
                                           pca2.components_.T)
         assert_allclose(pca1.explained_variance_,
@@ -33,13 +33,13 @@ def test_constant_weights():
         assert_allclose(X1, X2)
 
         assert_columns_allclose_upto_sign(pca1.fit_transform(X),
-                                          pca2.fit_transform(X, W))
+                                          pca2.fit_transform(X, weights=W))
 
         assert_allclose(pca1.reconstruct(X),
                         pca2.reconstruct(X, W))
 
         assert_allclose(pca1.fit_reconstruct(X),
-                        pca2.fit_reconstruct(X, W))
+                        pca2.fit_reconstruct(X, weights=W))
 
     for Estimator in ESTIMATORS:
         yield check_results, Estimator
@@ -58,7 +58,7 @@ def test_outlier_weights():
         W2 = np.ones_like(X2)
         W2[i, j] = 1. / noise_level
 
-        pca2 = Estimator(2, **KWDS[Estimator]).fit(X2, W2)
+        pca2 = Estimator(2, **KWDS[Estimator]).fit(X2, weights=W2)
         assert_columns_allclose_upto_sign(pca.components_.T,
                                           pca2.components_.T,
                                           rtol=rtol)
@@ -82,8 +82,8 @@ def test_nan_weights():
     X2[i, j] = np.nan
 
     def check_results(Estimator):
-        pca1 = Estimator(2, **KWDS[Estimator]).fit(X, W)
-        pca2 = Estimator(2, **KWDS[Estimator]).fit(X2, W)
+        pca1 = Estimator(2, **KWDS[Estimator]).fit(X, weights=W)
+        pca2 = Estimator(2, **KWDS[Estimator]).fit(X2, weights=W)
         assert_columns_allclose_upto_sign(pca1.components_.T,
                                           pca2.components_.T)
         assert_allclose(pca1.explained_variance_,

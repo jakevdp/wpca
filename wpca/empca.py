@@ -1,7 +1,9 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_array
 
-from .utils import orthonormalize, random_orthonormal, solve_weighted
+from .utils import (orthonormalize, random_orthonormal,
+                    solve_weighted, check_array_with_weights)
 
 
 class EMPCA(BaseEstimator, TransformerMixin):
@@ -75,7 +77,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
             eigvec[:i + 1] = orthonormalize(eigvec[:i + 1])
         return eigvec
 
-    def fit_transform(self, X, weights=None):
+    def fit_transform(self, X, y=None, weights=None):
         """Fit the model with X and apply the dimensionality reduction on X.
 
         Parameters
@@ -92,6 +94,8 @@ class EMPCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
+        X, weights = check_array_with_weights(X, weights)
+
         if self.n_components is None:
             n_components = X.shape[1]
         else:
@@ -125,7 +129,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
                                           / X_c.var(0).sum())
         return coeff
 
-    def fit(self, X, weights=None):
+    def fit(self, X, y=None, weights=None):
         """Compute principal components for X
 
         Parameters
@@ -166,6 +170,8 @@ class EMPCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
+        X, weights = check_array_with_weights(X, weights)
+
         X_c = X - self.mean_
         if weights is not None:
             assert X.shape == weights.shape
@@ -186,6 +192,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
         -------
         X_original : array-like, shape (n_samples, n_features)
         """
+        X = check_array(X)
         return self.mean_ + np.dot(X, self.components_)
 
     def reconstruct(self, X, weights=None):

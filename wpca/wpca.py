@@ -2,6 +2,8 @@ import numpy as np
 from scipy import linalg
 
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_array
+from .utils import check_array_with_weights
 
 
 class WPCA(BaseEstimator, TransformerMixin):
@@ -53,7 +55,7 @@ class WPCA(BaseEstimator, TransformerMixin):
         self.xi = xi
         self.regularization = regularization
 
-    def fit(self, X, weights=None):
+    def fit(self, X, y=None, weights=None):
         """Compute principal components for X
 
         Parameters
@@ -71,6 +73,8 @@ class WPCA(BaseEstimator, TransformerMixin):
         self : object
             Returns the instance itself.
         """
+        X, weights = check_array_with_weights(X, weights)
+
         if self.n_components is None:
             n_components = X.shape[1]
         else:
@@ -124,6 +128,8 @@ class WPCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
+        X, weights = check_array_with_weights(X, weights)
+
         if weights is None:
             weights = np.ones_like(X)
         Y = np.zeros((X.shape[0], self.components_.shape[0]))
@@ -140,7 +146,7 @@ class WPCA(BaseEstimator, TransformerMixin):
             Y[i] = np.linalg.solve(cWc, cWX)
         return Y
 
-    def fit_transform(self, X, weights=None):
+    def fit_transform(self, X, y=None, weights=None):
         """Fit the model with X and apply the dimensionality reduction on X.
 
         Parameters
@@ -173,6 +179,7 @@ class WPCA(BaseEstimator, TransformerMixin):
         -------
         X_original : array-like, shape (n_samples, n_features)
         """
+        X = check_array(X)
         return self.mean_ + np.dot(X, self.components_)
 
     def reconstruct(self, X, weights=None):

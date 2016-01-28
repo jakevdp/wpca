@@ -16,9 +16,9 @@ rand = np.random.RandomState(42)
 DATA = {shape: rand.randn(*shape) for shape in SHAPES}
 
 
-#def test_estimator_checks():
-#    for Estimator in ESTIMATORS:
-#        yield check_estimator, Estimator
+def test_estimator_checks():
+    for Estimator in ESTIMATORS:
+        yield check_estimator, Estimator
 
 
 def test_components_None():

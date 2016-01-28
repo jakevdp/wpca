@@ -1,4 +1,21 @@
 import numpy as np
+from sklearn.utils.validation import check_array
+
+
+def check_array_with_weights(X, weights, **kwargs):
+    if weights is None:
+        return check_array(X, **kwargs), weights
+
+    weights = check_array(weights, **kwargs)
+    kwargs_allow_nonfinite = dict(kwargs)
+    kwargs_allow_nonfinite.update(force_all_finite=False)
+    X = check_array(X, **kwargs_allow_nonfinite)
+    if X.shape != weights.shape:
+        raise ValueError("Shape of `X` and `weights` should match")
+    if not np.all(np.isfinite(X) | (weights == 0)):
+        raise ValueError("Input contains NaN or infinity without "
+                         "a corresponding zero in `weights`.")
+    return X, weights
 
 
 def orthonormalize(X, rows=True):

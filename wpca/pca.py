@@ -1,6 +1,7 @@
 import numpy as np
 
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_array
 
 
 class PCA(BaseEstimator, TransformerMixin):
@@ -37,7 +38,7 @@ class PCA(BaseEstimator, TransformerMixin):
     def __init__(self, n_components=None):
         self.n_components = n_components
 
-    def fit_transform(self, X):
+    def fit_transform(self, X, y=None):
         """Fit the model with X and apply the dimensionality reduction on X.
 
         Parameters
@@ -50,6 +51,7 @@ class PCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
+        X = check_array(X)
         if self.n_components is None:
             n_components = X.shape[1]
         else:
@@ -63,7 +65,7 @@ class PCA(BaseEstimator, TransformerMixin):
         self.explained_variance_ratio_ = var[:n_components] / var.sum()
         return s[:n_components] * U[:, :n_components]
 
-    def fit(self, X):
+    def fit(self, X, y=None):
         """Compute principal components for X
 
         Parameters
@@ -96,6 +98,7 @@ class PCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
+        X = check_array(X)
         return np.dot(X - self.mean_, self.components_.T)
 
     def inverse_transform(self, X):
@@ -112,6 +115,7 @@ class PCA(BaseEstimator, TransformerMixin):
         -------
         X_original : array-like, shape (n_samples, n_features)
         """
+        X = check_array(X)
         return self.mean_ + np.dot(X, self.components_)
 
     def reconstruct(self, X):
