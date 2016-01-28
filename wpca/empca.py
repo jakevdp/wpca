@@ -19,7 +19,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
     def _Estep_unweighted(self, eigvec, data, coeff):
         """E-step for unweighted EMPCA: update coeff"""
-        coeff[:] = np.linalg.solve(eigvec.T, data.T).T
+        coeff[:] = np.dot(data, eigvec.T)
         return coeff
 
     def _Mstep_weighted(self, eigvec, data, weights, coeff):
@@ -52,7 +52,6 @@ class EMPCA(BaseEstimator, TransformerMixin):
     def fit_transform(self, X, weights=None):
         if weights is None:
             self.mean_ = X.mean(0)
-            weights = np.ones_like(X)
         else:
             XW = X * weights
             # handle NaN values
@@ -78,9 +77,11 @@ class EMPCA(BaseEstimator, TransformerMixin):
             self._Estep_weighted(eigvec, X_c, weights, coeff)
 
         self.components_ = eigvec
-        # TODO: need to compute these:
-        self.explained_variance_ = None
-        self.explained_variance_ratio_ = None
+        self.explained_variance_ = (np.dot(coeff.T, coeff).diagonal()
+                                    / X.shape[0])
+        # TODO: how to compute weighted total variance?
+        self.explained_variance_ratio_ = (self.explained_variance_
+                                          / X_c.var(0).sum())
         return coeff
 
     def fit(self, X, weights=None):
@@ -90,9 +91,53 @@ class EMPCA(BaseEstimator, TransformerMixin):
     def transform(self, X, weights=None):
         coeff = np.zeros((X.shape[0], self.n_components))
         if weights is None:
-            return self._Estep_unweighted(self.components_, X, coeff)
+            return self._Estep_unweighted(self.components_,
+                                          X - self.mean_, coeff)
         else:
-            return self._Estep_weighted(self.components_, X, weights, coeff)
+            return self._Estep_weighted(self.components_,
+                                        X - self.mean_, weights, coeff)
+
+    def inverse_transform(self, X):
+        """Transform data back to its original space.
+
+        Returns an array X_original whose transform would be X.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_components)
+            Data in transformed representation.
+
+        Returns
+        -------
+        X_original : array-like, shape (n_samples, n_features)
+        """
+        return self.mean_ + np.dot(X, self.components_)
+
+    def reconstruct(self, X, weights=None):
+        """Reconstruct the data using the PCA model
+
+        This is equivalent to calling transform followed by inverse_transform.
+
+        Parameters
+        ----------
+        X : array-like, shape (n_samples, n_components)
+            Data in transformed representation.
+
+        weights: array-like, shape (n_samples, n_features)
+            Non-negative weights encoding the reliability of each measurement.
+            Equivalent to the inverse of the Gaussian errorbar.
+
+        Returns
+        -------
+        X_reconstructed : array-like, shape (n_samples, n_components)
+            Reconstructed version of X
+        """
+        return self.inverse_transform(self.transform(X, weights))
+
+    def fit_reconstruct(self, X, weights=None):
+        """TODO
+        """
+        return self.inverse_transform(self.fit_transform(X, weights))
 
 
 def _Estep(eigvec, data, weights, coeff):

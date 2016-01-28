@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
-from .wpca_estimators import PCA, WPCA
+from .wpca import WPCA
+from .pca import PCA
+from .empca import EMPCA
 
 __version__ = "0.1.dev0"
