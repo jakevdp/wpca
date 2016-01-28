@@ -13,9 +13,15 @@ def test_orthonormalize():
 
 
 def test_random_orthonormal():
-    def check_random_orthonormal(n_samples, n_features):
-        X = random_orthonormal(n_samples, n_features, random_state=42)
-        assert X.shape == (n_samples, n_features)
-        assert_allclose(np.dot(X, X.T), np.eye(X.shape[0]), atol=1E-15)
-    for n_samples in range(1, 6):
-        yield check_random_orthonormal, n_samples, 5
+    def check_random_orthonormal(N, M, rows):
+        X = random_orthonormal(N, M, rows=rows, random_state=42)
+        assert X.shape == (N, M)
+        if rows:
+            C = np.dot(X, X.T)
+        else:
+            C = np.dot(X.T, X)
+        assert_allclose(C, np.eye(C.shape[0]), atol=1E-15)
+    for M in [5]:
+        for N in range(1, M + 1):
+            yield check_random_orthonormal, N, M, True
+            yield check_random_orthonormal, M, N, False

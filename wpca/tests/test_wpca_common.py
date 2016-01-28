@@ -6,12 +6,12 @@ from .. import PCA, WPCA, EMPCA
 
 
 ESTIMATORS = [WPCA, EMPCA]
-KWDS = {WPCA:{}, EMPCA:{'random_state':0}}
+KWDS = {WPCA: {}, EMPCA: {'random_state': 0}}
 
 
 def test_constant_weights():
     rand = np.random.RandomState(0)
-    X = rand.multivariate_normal([0, 0], [[12, 6],[6, 5]], size=100)
+    X = rand.multivariate_normal([0, 0], [[12, 6], [6, 5]], size=100)
     W = np.ones_like(X)
 
     def check_results(Estimator):
@@ -47,7 +47,7 @@ def test_constant_weights():
 
 def test_outlier_weights():
     rand = np.random.RandomState(0)
-    X = rand.multivariate_normal([0, 0], [[12, 6],[6, 5]], size=1000)
+    X = rand.multivariate_normal([0, 0], [[12, 6], [6, 5]], size=1000)
     pca = PCA(2).fit(X)
 
     def check_results(Estimator, n_outliers, noise_level, rtol):

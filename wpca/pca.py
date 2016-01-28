@@ -2,6 +2,7 @@ import numpy as np
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
+
 class PCA(BaseEstimator, TransformerMixin):
     """Principal Component Analysis
 

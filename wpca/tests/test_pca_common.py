@@ -1,16 +1,24 @@
+from .tools import assert_columns_allclose_upto_sign
 from .. import PCA, WPCA, EMPCA
+
 from sklearn.decomposition import PCA as SKPCA
+from sklearn.utils.estimator_checks import check_estimator
+
 import numpy as np
 from numpy.testing import assert_allclose
-from .tools import assert_columns_allclose_upto_sign
 
 
 ESTIMATORS = [PCA, WPCA, EMPCA]
-KWDS = {PCA:{}, WPCA:{}, EMPCA:{'random_state':0}}
+KWDS = {PCA: {}, WPCA: {}, EMPCA: {'random_state': 0}}
 N_COMPONENTS = range(1, 6)
 SHAPES = [(10, 5), (6, 10)]
 rand = np.random.RandomState(42)
 DATA = {shape: rand.randn(*shape) for shape in SHAPES}
+
+
+#def test_estimator_checks():
+#    for Estimator in ESTIMATORS:
+#        yield check_estimator, Estimator
 
 
 def test_components_vs_sklearn():

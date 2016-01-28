@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def orthonormalize(X, rows=True):
     """Orthonormalize X using QR-decomposition
 
@@ -33,8 +34,7 @@ def random_orthonormal(N, M, rows=True, random_state=None):
     random_state : int or None
         Specify the random state used in construction of the matrix.
     """
-    if rows: assert N <= M
-    else: assert N >= M
+    assert N <= M if rows else N >= M
     rand = np.random.RandomState(random_state)
     return orthonormalize(rand.randn(N, M), rows=rows)
 

@@ -119,7 +119,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         self.components_ = eigvec
         self.explained_variance_ = (coeff ** 2).sum(0) / X.shape[0]
-        
+
         # TODO: correctly handle weighted variance here?
         self.explained_variance_ratio_ = (self.explained_variance_
                                           / X_c.var(0).sum())
