@@ -214,7 +214,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
         X_reconstructed : ndarray, shape (n_samples, n_components)
             Reconstructed version of X
         """
-        return self.inverse_transform(self.transform(X, weights))
+        return self.inverse_transform(self.transform(X, weights=weights))
 
     def fit_reconstruct(self, X, weights=None):
         """Fit the model and reconstruct the data using the PCA model
@@ -236,4 +236,4 @@ class EMPCA(BaseEstimator, TransformerMixin):
         X_reconstructed : ndarray, shape (n_samples, n_components)
             Reconstructed version of X
         """
-        return self.inverse_transform(self.fit_transform(X, weights))
+        return self.inverse_transform(self.fit_transform(X, weights=weights))
