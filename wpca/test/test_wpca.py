@@ -14,7 +14,7 @@ def assert_columns_allclose_upto_sign(A, B, *args, **kwargs):
     assert_allclose(norm_sign(A), norm_sign(B), *args, **kwargs)
 
 
-def test_with_outliers():
+def test_wpca_with_outliers():
     rand = np.random.RandomState(0)
     X = rand.multivariate_normal([0, 0], [[12, 6],[6, 5]], size=1000)
     pca = WPCA(2).fit(X)
@@ -36,7 +36,7 @@ def test_with_outliers():
         yield check_results, n_outliers, noise_level, rtol
 
 
-def test_with_nans():
+def test_wpca_with_nans():
     rand = np.random.RandomState(0)
     X = rand.rand(100, 10)
 
