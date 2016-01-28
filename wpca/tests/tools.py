@@ -10,3 +10,9 @@ def norm_sign(X):
 
 def assert_columns_allclose_upto_sign(A, B, *args, **kwargs):
     assert_allclose(norm_sign(A), norm_sign(B), *args, **kwargs)
+
+
+def assert_allclose_upto_sign(x, y, *args, **kwargs):
+    x = x.ravel()[:, None]
+    y = y.ravel()[:, None]
+    assert_columns_allclose_upto_sign(x, y, *args, **kwargs)
