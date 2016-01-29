@@ -110,6 +110,10 @@ def test_bad_inputs():
     bad1 = (X > 0.8)
     bad2 = (X > 0.9)
 
+    def check_mismatch(Estimator):
+        pca = Estimator()
+        assert_raises(ValueError, pca.fit, X, weights=W.T)
+
     def check_bad_inputs(Estimator, bad_val):
         X[bad1] = bad_val
         W[bad2] = 0
@@ -117,5 +121,6 @@ def test_bad_inputs():
         assert_raises(ValueError, pca.fit, X, weights=W)
 
     for Estimator in ESTIMATORS:
+        yield check_mismatch, Estimator
         for bad_val in [np.inf, np.nan]:
             yield check_bad_inputs, Estimator, bad_val
