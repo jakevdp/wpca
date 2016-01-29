@@ -14,7 +14,7 @@ Analysis, using a very similar interface to scikit-learn's
 - ``wpca.WPCA`` uses a direct decomposition of a weighted covariance matrix to
   compute principal vectors, and then a weighted least squares optimization
   to compute principal components. It is based on the algorithm presented
-  in [Delchambre (2104)](http://arxiv.org/abs/1412.4533)
+  in [Delchambre (2014)](http://arxiv.org/abs/1412.4533)
 
 - ``wpca.EMPCA`` uses an iterative expectation-maximization approach to solve
   simultaneously for the principal vectors and principal components of
