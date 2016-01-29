@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA as SKPCA
 from sklearn.utils.estimator_checks import check_estimator
 
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_raises
 
 
 ESTIMATORS = [PCA, WPCA, EMPCA]
@@ -115,3 +115,18 @@ def test_pca_reconstruct():
     for Estimator in ESTIMATORS:
         for shape in SHAPES:
             yield check_reconstruct, Estimator, shape
+
+
+def test_bad_inputs():
+    rand = np.random.RandomState(42)
+    X = rand.rand(10, 3)
+    bad = (X > 0.8)
+
+    def check_bad_inputs(Estimator, bad_val):
+        X[bad] = bad_val
+        pca = Estimator()
+        assert_raises(ValueError, pca.fit, X)
+
+    for Estimator in ESTIMATORS:
+        for bad_val in [np.inf, np.nan]:
+            yield check_bad_inputs, Estimator, bad_val

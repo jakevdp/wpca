@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_raises
 from .tools import assert_columns_allclose_upto_sign
 
 from .. import PCA, WPCA, EMPCA
@@ -101,3 +101,21 @@ def test_nan_weights():
 
     for Estimator in ESTIMATORS:
         yield check_results, Estimator
+
+
+def test_bad_inputs():
+    rand = np.random.RandomState(42)
+    X = rand.rand(10, 3)
+    W = np.ones_like(X)
+    bad1 = (X > 0.8)
+    bad2 = (X > 0.9)
+
+    def check_bad_inputs(Estimator, bad_val):
+        X[bad1] = bad_val
+        W[bad2] = 0
+        pca = Estimator()
+        assert_raises(ValueError, pca.fit, X, weights=W)
+
+    for Estimator in ESTIMATORS:
+        for bad_val in [np.inf, np.nan]:
+            yield check_bad_inputs, Estimator, bad_val
