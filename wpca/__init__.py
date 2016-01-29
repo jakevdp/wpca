@@ -4,4 +4,4 @@ from .wpca import WPCA
 from .pca import PCA
 from .empca import EMPCA
 
-__version__ = "0.1"
+__version__ = "0.2.dev0"
