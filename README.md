@@ -2,7 +2,10 @@
 
 *Author: Jake VanderPlas*
 
+[![version status](http://img.shields.io/pypi/v/wpca.svg?style=flat)](https://pypi.python.org/pypi/wpca)
+[![downloads](http://img.shields.io/pypi/dm/wpca.svg?style=flat)](https://pypi.python.org/pypi/wpca)
 [![build status](http://img.shields.io/travis/jakevdp/wpca/master.svg?style=flat)](https://travis-ci.org/jakevdp/wpca)
+[![license](http://img.shields.io/badge/license-BSD-blue.svg?style=flat)](https://github.com/jakevdp/wpca/blob/master/LICENSE)
 
 This repository contains several implementations of Weighted Principal Component
 Analysis, using a very similar interface to scikit-learn's
@@ -38,9 +41,14 @@ This package has the following requirements:
 
 With these requirements satisfied, you can install this package by running
 ```
+pip install wpca
+```
+or to install from the source tree, run
+```
 $ python setup.py install
 ```
-To run the unit tests, make sure ``nose`` is installed and run
+
+To run the suite of unit tests, make sure ``nose`` is installed and run
 ```
 $ nosetests wpca
 ```
