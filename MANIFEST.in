@@ -1,0 +1,6 @@
+include *.md
+include *.py
+include *.cfg
+include WPCA-Example.ipynb
+recursive-include wpca *.py
+include LICENSE

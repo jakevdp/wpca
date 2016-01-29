@@ -26,19 +26,19 @@ def version(path):
 
 DESCRIPTION = "Weighted Principal Component Analysis"
 LONG_DESCRIPTION = """
-wpca: Weighted Principal Componen Analysis
-==========================================
+wpca: Weighted Principal Component Analysis
+===========================================
 
-For more information, visit http://github.com/jakevdp/wpca
+For more information, visit http://github.com/jakevdp/wpca/
 """
 NAME = "wpca"
 AUTHOR = "Jake VanderPlas"
 AUTHOR_EMAIL = "jakevdp@uw.edu"
 MAINTAINER = "Jake VanderPlas"
 MAINTAINER_EMAIL = "jakevdp@uw.edu"
-URL = 'http://github.com/jakevdp/wpca'
-DOWNLOAD_URL = 'http://github.com/jakevdp/wpca'
-LICENSE = 'BSD 3-clause'
+URL = 'http://github.com/jakevdp/wpca/'
+DOWNLOAD_URL = 'http://github.com/jakevdp/wpca/'
+LICENSE = 'BSD'
 
 VERSION = version('wpca/__init__.py')
 
@@ -62,5 +62,7 @@ setup(name=NAME,
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5'],
      )
