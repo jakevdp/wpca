@@ -173,7 +173,7 @@ class WPCA(BaseEstimator, TransformerMixin):
             # TODO: refactor so that this copy is not necessary
             warnings.warn("fit_transform() makes data copies even if "
                           "copy_data is set to False")
-            X, weights = check_array_with_weights(X, weights,dtype=float,
+            X, weights = check_array_with_weights(X, weights, dtype=float,
                                                   copy=True)
         return self.fit(X, weights=weights).transform(X, weights=weights)
 
