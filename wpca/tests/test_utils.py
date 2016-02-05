@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.testing import assert_allclose
 
-from .tools import assert_allclose_upto_sign
-from ..utils import orthonormalize, random_orthonormal
+from wpca.tests.tools import assert_allclose_upto_sign
+from wpca.utils import orthonormalize, random_orthonormal
 
 
 def test_orthonormalize():

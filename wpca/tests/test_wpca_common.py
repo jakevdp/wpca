@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.testing import assert_allclose, assert_raises
-from .tools import assert_columns_allclose_upto_sign
+from wpca.tests.tools import assert_columns_allclose_upto_sign
 
-from .. import PCA, WPCA, EMPCA
+from wpca import PCA, WPCA, EMPCA
 
 
 ESTIMATORS = [WPCA, EMPCA]
@@ -124,3 +124,25 @@ def test_bad_inputs():
         yield check_mismatch, Estimator
         for bad_val in [np.inf, np.nan]:
             yield check_bad_inputs, Estimator, bad_val
+
+
+def test_copy_data():
+    rand = np.random.RandomState(0)
+    X = rand.multivariate_normal([0, 0], [[12, 6], [6, 5]], size=100)
+    W = rand.rand(*X.shape)
+    X_orig = X.copy()
+
+    # with copy_data=True, X should not change
+    pca1 = WPCA(copy_data=True)
+    pca1.fit(X, W)
+    assert np.all(X == X_orig)
+
+    # with copy_data=False, X should be overwritten
+    pca2 = WPCA(copy_data=False)
+    pca2.fit(X, W)
+    assert not np.allclose(X, X_orig)
+
+    # all results should match
+    assert_allclose(pca1.mean_, pca2.mean_)
+    assert_allclose(pca1.components_, pca2.components_)
+    assert_allclose(pca1.explained_variance_, pca2.explained_variance_)

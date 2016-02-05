@@ -3,13 +3,24 @@ from sklearn.utils.validation import check_array
 
 
 def check_array_with_weights(X, weights, **kwargs):
+    """Utility to validate data and weights.
+
+    This calls check_array on X and weights, making sure results match.
+    """
     if weights is None:
         return check_array(X, **kwargs), weights
 
-    weights = check_array(weights, **kwargs)
-    kwargs_allow_nonfinite = dict(kwargs)
-    kwargs_allow_nonfinite.update(force_all_finite=False)
-    X = check_array(X, **kwargs_allow_nonfinite)
+    # Always use copy=False for weights
+    kwargs_weights = dict(kwargs)
+    kwargs_weights.update(copy=False)
+    weights = check_array(weights, **kwargs_weights)
+
+    # Always use force_all_finite=False for X
+    kwargs_X = dict(kwargs)
+    kwargs_X.update(force_all_finite=False)
+    X = check_array(X, **kwargs_X)
+
+    # Make sure shapes match and missing data has weights=0
     if X.shape != weights.shape:
         raise ValueError("Shape of `X` and `weights` should match")
     if not np.all(np.isfinite(X) | (weights == 0)):

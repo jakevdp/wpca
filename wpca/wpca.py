@@ -25,6 +25,9 @@ class WPCA(BaseEstimator, TransformerMixin):
         Control the strength of ridge regularization used to compute the
         transform.
 
+    copy_data : boolean, optional, default True
+        If True, X and weights will be copied; else, they may be overwritten.
+
     Attributes
     ----------
     components_ : array, [n_components, n_features]
@@ -50,10 +53,12 @@ class WPCA(BaseEstimator, TransformerMixin):
     .. [1] Delchambre, L. MNRAS 2014 446 (2): 3545-3555 (2014)
            http://arxiv.org/abs/1412.4533
     """
-    def __init__(self, n_components=None, xi=0, regularization=None):
+    def __init__(self, n_components=None, xi=0, regularization=None,
+                 copy_data=True):
         self.n_components = n_components
         self.xi = xi
         self.regularization = regularization
+        self.copy_data = copy_data
 
     def fit(self, X, y=None, weights=None):
         """Compute principal components for X
@@ -73,7 +78,8 @@ class WPCA(BaseEstimator, TransformerMixin):
         self : object
             Returns the instance itself.
         """
-        X, weights = check_array_with_weights(X, weights)
+        X, weights = check_array_with_weights(X, weights, dtype=float,
+                                              copy=self.copy_data)
 
         if self.n_components is None:
             n_components = X.shape[1]
@@ -81,25 +87,25 @@ class WPCA(BaseEstimator, TransformerMixin):
             n_components = self.n_components
 
         if weights is None:
-            self.mean_ = X.mean(0)
             weights = np.ones_like(X)
-        else:
-            XW = X * weights
-            # handle NaN values
-            XW[weights == 0] = 0
-            self.mean_ = XW.sum(0) / weights.sum(0)
 
-        # TODO: check for NaN and filter warnings
-        Ws = weights.sum(0)
-        XW = (X - self.mean_) * weights
+        # XW will equal (X - mean) * weights
+        # but we do all operations in-place for memory efficiency
+        XW = X
+        XW *= weights
+        XW[weights == 0] = 0  # appropriately handle missing data (NaNs/Infs)
+        self.mean_ = XW.sum(0) / weights.sum(0)
+        XW -= weights * self.mean_
 
-        # Handle NaNs in XW
-        XW[weights == 0] = 0
-
-        covar = np.dot(XW.T, XW) / np.dot(weights.T, weights)
-        if self.xi != 0:
-            covar *= np.outer(Ws, Ws) ** self.xi
+        # TODO: filter NaN warnings
+        covar = np.dot(XW.T, XW)
+        covar /= np.dot(weights.T, weights)
         covar[np.isnan(covar)] = 0
+
+        # enhance weights if desired
+        if self.xi != 0:
+            Ws = weights.sum(0)
+            covar *= np.outer(Ws, Ws) ** self.xi
 
         eigvals = (X.shape[1] - n_components, X.shape[1] - 1)
         evals, evecs = linalg.eigh(covar, eigvals=eigvals)
@@ -163,6 +169,12 @@ class WPCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
+        if not self.copy_data:
+            # TODO: refactor so that this copy is not necessary
+            warnings.warn("fit_transform() makes data copies even if "
+                          "copy_data is set to False")
+            X, weights = check_array_with_weights(X, weights,dtype=float,
+                                                  copy=True)
         return self.fit(X, weights=weights).transform(X, weights=weights)
 
     def inverse_transform(self, X):

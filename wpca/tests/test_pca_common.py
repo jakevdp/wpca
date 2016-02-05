@@ -1,5 +1,5 @@
-from .tools import assert_columns_allclose_upto_sign
-from .. import PCA, WPCA, EMPCA
+from wpca.tests.tools import assert_columns_allclose_upto_sign
+from wpca import PCA, WPCA, EMPCA
 
 from sklearn.decomposition import PCA as SKPCA
 from sklearn.utils.estimator_checks import check_estimator
