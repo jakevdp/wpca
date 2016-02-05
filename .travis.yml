@@ -32,6 +32,6 @@ script:
   - nosetests --with-doctest wpca
 
 before_cache:
-  # clean unused packages & remove installed files from cache
+  # clean unused packages & remove installed files from cache 
   - conda clean -tp --yes
   - xargs rm <installed_files.txt
