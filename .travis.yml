@@ -1,7 +1,10 @@
 language: python
 
-# Setting sudo to false opts in to Travis-CI container-based builds.
 sudo: false
+
+cache:
+  directories:
+    - $HOME/miniconda
 
 python:
   - 2.7
@@ -11,19 +14,18 @@ python:
 env:
   - CONDA_DEPS="numpy scipy nose scikit-learn"
 
-install:
-  - conda create -n testenv --yes python=$TRAVIS_PYTHON_VERSION
-  - source activate testenv
-  - conda install --yes $CONDA_DEPS
-  - python setup.py install
-
 before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - export PATH=/home/travis/miniconda3/bin:$PATH
-  # miniconda is not always up-to-date with conda.
+  - export MINICONDA=$HOME/miniconda
+  - export PATH=$MINICONDA/bin:$PATH
+  - command -v conda >/dev/null || { wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+     bash miniconda.sh -b -f -p $MINICONDA; }
   - conda update --yes conda
+  # useful for diagnostics
+  - conda info -a
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION $CONDA_DEPS
+
+install:
+  - python setup.py install
 
 script:
   - nosetests --with-doctest wpca
