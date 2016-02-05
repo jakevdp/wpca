@@ -1,5 +1,6 @@
 language: python
 
+# set up containerized builds with cacheing
 sudo: false
 
 cache:
