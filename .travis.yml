@@ -26,7 +26,12 @@ before_install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION $CONDA_DEPS
 
 install:
-  - python setup.py install
+  - python setup.py install --record installed_files.txt
 
 script:
   - nosetests --with-doctest wpca
+
+before_cache:
+  # clean unused packages & remove installed files from cache
+  - conda clean -tp
+  - xargs rm <installed_files.txt
