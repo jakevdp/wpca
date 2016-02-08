@@ -9,6 +9,29 @@ ESTIMATORS = [WPCA, EMPCA]
 KWDS = {WPCA: {}, EMPCA: {'random_state': 0}}
 
 
+def test_fit_and_fit_transform():
+    rand = np.random.RandomState(0)
+    X = np.random.rand(30, 3)
+    W = np.random.rand(30, 3)
+
+    def check_results(Estimator, copy_data):
+        if Estimator is EMPCA:
+            # copy_data not yet implemented
+            pca = Estimator(2, **KWDS[Estimator])
+        else:
+            pca = Estimator(2, copy_data=copy_data, **KWDS[Estimator])
+
+        Y1 = pca.fit_transform(X.copy(), weights=W.copy())
+        Y2 = pca.transform(X.copy(), weights=W.copy())
+
+        assert_columns_allclose_upto_sign(Y1, Y2)
+
+    for Estimator in ESTIMATORS:
+        for copy_data in [True, False]:
+            yield check_results, Estimator, copy_data
+
+
+
 def test_constant_weights():
     rand = np.random.RandomState(0)
     X = rand.multivariate_normal([0, 0], [[12, 6], [6, 5]], size=100)
@@ -134,12 +157,12 @@ def test_copy_data():
 
     # with copy_data=True, X should not change
     pca1 = WPCA(copy_data=True)
-    pca1.fit(X, W)
+    pca1.fit(X, weights=W)
     assert np.all(X == X_orig)
 
     # with copy_data=False, X should be overwritten
     pca2 = WPCA(copy_data=False)
-    pca2.fit(X, W)
+    pca2.fit(X, weights=W)
     assert not np.allclose(X, X_orig)
 
     # all results should match

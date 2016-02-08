@@ -23,7 +23,11 @@ def check_array_with_weights(X, weights, **kwargs):
     # Make sure shapes match and missing data has weights=0
     if X.shape != weights.shape:
         raise ValueError("Shape of `X` and `weights` should match")
-    if not np.all(np.isfinite(X) | (weights == 0)):
+
+    Wzero = (weights == 0)
+    X[Wzero] = 0
+
+    if not np.all(np.isfinite(X)):
         raise ValueError("Input contains NaN or infinity without "
                          "a corresponding zero in `weights`.")
     return X, weights

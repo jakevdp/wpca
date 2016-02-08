@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.umath_tests import inner1d
 from scipy import linalg
 
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -60,6 +61,28 @@ class WPCA(BaseEstimator, TransformerMixin):
         self.regularization = regularization
         self.copy_data = copy_data
 
+    def _center_and_weight(self, X, weights, fit_mean=False):
+        """Compute centered and weighted version of X.
+
+        If fit_mean is True, then also save the mean to self.mean_
+        """
+        X, weights = check_array_with_weights(X, weights, dtype=float,
+                                              copy=self.copy_data)
+
+        if weights is None:
+            weights = np.ones_like(X)
+
+        if fit_mean:
+            # efficient weighted average, without large temporary arrays
+            self.mean_ = (inner1d(X.T, weights.T) /
+                          inner1d(weights.T, weights.T))
+
+        # now let X <- (X - mean) * weights
+        X -= self.mean_
+        X *= weights
+
+        return X, weights
+
     def fit(self, X, y=None, weights=None):
         """Compute principal components for X
 
@@ -78,27 +101,20 @@ class WPCA(BaseEstimator, TransformerMixin):
         self : object
             Returns the instance itself.
         """
-        X, weights = check_array_with_weights(X, weights, dtype=float,
-                                              copy=self.copy_data)
+        # let X <- (X - mean) * weights
+        X, weights = self._center_and_weight(X, weights, fit_mean=True)
+        self._fit_precentered(X, weights)
+        return self
 
+    def _fit_precentered(self, X, weights):
+        """fit pre-centered data"""
         if self.n_components is None:
             n_components = X.shape[1]
         else:
             n_components = self.n_components
 
-        if weights is None:
-            weights = np.ones_like(X)
-
-        # XW will equal (X - mean) * weights
-        # but we do all operations in-place for memory efficiency
-        XW = X
-        XW *= weights
-        XW[weights == 0] = 0  # appropriately handle missing data (NaNs/Infs)
-        self.mean_ = XW.sum(0) / weights.sum(0)
-        XW -= weights * self.mean_
-
         # TODO: filter NaN warnings
-        covar = np.dot(XW.T, XW)
+        covar = np.dot(X.T, X)
         covar /= np.dot(weights.T, weights)
         covar[np.isnan(covar)] = 0
 
@@ -112,7 +128,6 @@ class WPCA(BaseEstimator, TransformerMixin):
         self.components_ = evecs[:, ::-1].T
         self.explained_variance_ = evals[::-1]
         self.explained_variance_ratio_ = evals[::-1] / covar.trace()
-        return self
 
     def transform(self, X, weights=None):
         """Apply dimensionality reduction on X.
@@ -134,14 +149,16 @@ class WPCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
-        X, weights = check_array_with_weights(X, weights)
+        X, weights = self._center_and_weight(X, weights, fit_mean=False)
+        return self._transform_precentered(X, weights)
 
-        if weights is None:
-            weights = np.ones_like(X)
+    def _transform_precentered(self, X, weights):
+        """transform pre-centered data"""
+        # TODO: parallelize this?
         Y = np.zeros((X.shape[0], self.components_.shape[0]))
         for i in range(X.shape[0]):
             cW = self.components_ * weights[i]
-            WX = (X[i] - self.mean_) * weights[i]
+            WX = X[i] * weights[i]
             # handle NaN values in X
             WX[weights[i] == 0] = 0
 
@@ -169,13 +186,9 @@ class WPCA(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
-        if not self.copy_data:
-            # TODO: refactor so that this copy is not necessary
-            warnings.warn("fit_transform() makes data copies even if "
-                          "copy_data is set to False")
-            X, weights = check_array_with_weights(X, weights, dtype=float,
-                                                  copy=True)
-        return self.fit(X, weights=weights).transform(X, weights=weights)
+        X, weights = self._center_and_weight(X, weights, fit_mean=True)
+        self._fit_precentered(X, weights)
+        return self._transform_precentered(X, weights)
 
     def inverse_transform(self, X):
         """Transform data back to its original space.
