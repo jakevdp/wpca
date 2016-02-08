@@ -41,7 +41,7 @@ This package has the following requirements:
 
 With these requirements satisfied, you can install this package by running
 ```
-pip install wpca
+$ pip install wpca
 ```
 or to install from the source tree, run
 ```
