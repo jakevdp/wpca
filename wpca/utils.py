@@ -101,7 +101,8 @@ def weighted_mean(x, w=None, axis=None):
     x : array_like
         data for which mean is computed
     w : array_like (optional)
-        weights corresponding to each data point
+        weights corresponding to each data point. If supplied, it must be the
+        same shape as x
     axis : int or None (optional)
         axis along which mean should be computed
 
@@ -113,19 +114,29 @@ def weighted_mean(x, w=None, axis=None):
     if w is None:
         return np.mean(x, axis)
 
-    elif x.shape != w.shape:
+    x = np.asarray(x)
+    w = np.asarray(w)
+
+    if x.shape != w.shape:
         raise NotImplementedError("Broadcasting is not implemented: "
                                   "x and w must be the same shape.")
 
-    elif hasattr(axis, '__len__'):
-        raise NotImplementedError("multiple axes not implemented")
-
-    elif axis is None:
+    if axis is None:
         wx_sum = np.einsum('i,i', np.ravel(x), np.ravel(w))
-
     else:
-        wx_sum = np.einsum('...i,...i',
-                           np.rollaxis(x, axis, x.ndim),
-                           np.rollaxis(w, axis, w.ndim))
+        try:
+            axis = tuple(axis)
+        except TypeError:
+            axis = (axis,)
+
+        if len(axis) != len(set(axis)):
+            raise ValueError("duplicate value in 'axis'")
+
+        trans = sorted(set(range(x.ndim)).difference(axis)) + list(axis)
+        operand = "...{0},...{0}".format(''.join(chr(ord('i') + i)
+                                                 for i in range(len(axis))))
+        wx_sum = np.einsum(operand,
+                           np.transpose(x, trans),
+                           np.transpose(w, trans))
 
     return wx_sum / np.sum(w, axis)

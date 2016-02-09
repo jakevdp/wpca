@@ -1,3 +1,5 @@
+from itertools import chain, combinations
+
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -33,10 +35,14 @@ def test_weighted_mean():
         rand = np.random.RandomState(0)
         x = rand.rand(*shape)
         w = rand.rand(*shape)
-        print(np.average(x, axis, w))
-        print(weighted_mean(x, w, axis))
-        assert_allclose(np.average(x, axis, w), weighted_mean(x, w, axis))
+        wm = weighted_mean(x, w, axis)
+        assert_allclose(wm, np.average(x, axis, w))
+        assert_allclose(wm, (w * x).sum(axis) / w.sum(axis))
 
-    for shape in [(3,), (3, 4), (3, 4, 5)]:
-        for axis in [None] + list(range(len(shape))):
+
+    for ndim in range(1, 5):
+        shape = tuple(range(3, 3 + ndim))
+        axis_tuples = chain(*(combinations(range(ndim), nax)
+                            for nax in range(ndim + 1)))
+        for axis in chain([None], range(ndim), axis_tuples):
             yield check_weighted_mean, shape, axis
