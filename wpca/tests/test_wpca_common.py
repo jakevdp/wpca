@@ -9,6 +9,19 @@ ESTIMATORS = [WPCA, EMPCA]
 KWDS = {WPCA: {}, EMPCA: {'random_state': 0}}
 
 
+def test_weighted_mean():
+    rand = np.random.RandomState(0)
+    X = np.random.rand(30, 3)
+    W = np.random.rand(30, 3)
+
+    def test_weighted_mean(Estimator):
+        pca = Estimator().fit(X, weights=W)
+        assert_allclose(pca.mean_, np.average(X, weights=W, axis=0))
+
+    for Estimator in ESTIMATORS:
+        yield test_weighted_mean, Estimator
+
+
 def test_fit_and_fit_transform():
     rand = np.random.RandomState(0)
     X = np.random.rand(30, 3)
