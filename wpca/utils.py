@@ -88,3 +88,44 @@ def solve_weighted(A, b, w):
     ATw2 = A.T * w ** 2
     return np.linalg.solve(np.dot(ATw2, A),
                            np.dot(ATw2, b))
+
+
+def weighted_mean(x, w=None, axis=None):
+    """Compute the weighted mean along the given axis
+
+    The result is equivalent to (x * w).sum(axis) / w.sum(axis),
+    but large temporary arrays are not created.
+
+    Parameters
+    ----------
+    x : array_like
+        data for which mean is computed
+    w : array_like (optional)
+        weights corresponding to each data point
+    axis : int or None (optional)
+        axis along which mean should be computed
+
+    Returns
+    -------
+    mean : np.ndarray
+        array representing the weighted mean along the given axis
+    """
+    if w is None:
+        return np.mean(x, axis)
+
+    elif x.shape != w.shape:
+        raise NotImplementedError("Broadcasting is not implemented: "
+                                  "x and w must be the same shape.")
+
+    elif hasattr(axis, '__len__'):
+        raise NotImplementedError("multiple axes not implemented")
+
+    elif axis is None:
+        wx_sum = np.einsum('i,i', np.ravel(x), np.ravel(w))
+
+    else:
+        wx_sum = np.einsum('...i,...i',
+                           np.rollaxis(x, axis, x.ndim),
+                           np.rollaxis(w, axis, w.ndim))
+
+    return wx_sum / np.sum(w, axis)

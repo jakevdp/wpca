@@ -1,10 +1,9 @@
 import numpy as np
-from numpy.core.umath_tests import inner1d
 from scipy import linalg
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
-from .utils import check_array_with_weights
+from .utils import check_array_with_weights, weighted_mean
 
 
 class WPCA(BaseEstimator, TransformerMixin):
@@ -69,17 +68,16 @@ class WPCA(BaseEstimator, TransformerMixin):
         X, weights = check_array_with_weights(X, weights, dtype=float,
                                               copy=self.copy_data)
 
-        if weights is None:
-            weights = np.ones_like(X)
-
         if fit_mean:
-            # efficient weighted average, without large temporary arrays
-            self.mean_ = (inner1d(X.T, weights.T) /
-                          inner1d(weights.T, weights.T))
+            self.mean_ = weighted_mean(X, weights, axis=0)
 
         # now let X <- (X - mean) * weights
         X -= self.mean_
-        X *= weights
+
+        if weights is not None:
+            X *= weights
+        else:
+            weights = np.ones_like(X)
 
         return X, weights
 

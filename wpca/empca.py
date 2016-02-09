@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_array
 
-from .utils import (orthonormalize, random_orthonormal,
+from .utils import (orthonormalize, random_orthonormal, weighted_mean,
                     solve_weighted, check_array_with_weights)
 
 
@@ -101,16 +101,8 @@ class EMPCA(BaseEstimator, TransformerMixin):
         else:
             n_components = self.n_components
 
-        if weights is None:
-            self.mean_ = X.mean(0)
-            X_c = X - self.mean_
-        else:
-            assert X.shape == weights.shape
-            XW = X * weights
-            XW[weights == 0] = 0
-            self.mean_ = XW.sum(0) / weights.sum(0)
-            X_c = X - self.mean_
-            X_c[weights == 0] = 0
+        self.mean_ = weighted_mean(X, weights, axis=0)
+        X_c = X - self.mean_
 
         eigvec = random_orthonormal(n_components, X.shape[1],
                                     random_state=self.random_state)

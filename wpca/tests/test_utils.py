@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 from wpca.tests.tools import assert_allclose_upto_sign
-from wpca.utils import orthonormalize, random_orthonormal
+from wpca.utils import orthonormalize, random_orthonormal, weighted_mean
 
 
 def test_orthonormalize():
@@ -26,3 +26,17 @@ def test_random_orthonormal():
         for N in range(1, M + 1):
             yield check_random_orthonormal, N, M, True
             yield check_random_orthonormal, M, N, False
+
+
+def test_weighted_mean():
+    def check_weighted_mean(shape, axis):
+        rand = np.random.RandomState(0)
+        x = rand.rand(*shape)
+        w = rand.rand(*shape)
+        print(np.average(x, axis, w))
+        print(weighted_mean(x, w, axis))
+        assert_allclose(np.average(x, axis, w), weighted_mean(x, w, axis))
+
+    for shape in [(3,), (3, 4), (3, 4, 5)]:
+        for axis in [None] + list(range(len(shape))):
+            yield check_weighted_mean, shape, axis
