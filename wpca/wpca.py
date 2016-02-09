@@ -156,12 +156,8 @@ class WPCA(BaseEstimator, TransformerMixin):
         Y = np.zeros((X.shape[0], self.components_.shape[0]))
         for i in range(X.shape[0]):
             cW = self.components_ * weights[i]
-            WX = X[i] * weights[i]
-            # handle NaN values in X
-            WX[weights[i] == 0] = 0
-
+            cWX = np.dot(cW, X[i])
             cWc = np.dot(cW, cW.T)
-            cWX = np.dot(cW, WX)
             if self.regularization is not None:
                 cWc += np.diag(self.regularization / self.explained_variance_)
             Y[i] = np.linalg.solve(cWc, cWX)

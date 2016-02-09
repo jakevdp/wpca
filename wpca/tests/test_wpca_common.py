@@ -44,11 +44,10 @@ def test_fit_and_fit_transform():
             yield check_results, Estimator, copy_data
 
 
-
 def test_constant_weights():
     rand = np.random.RandomState(0)
     X = rand.multivariate_normal([0, 0], [[12, 6], [6, 5]], size=100)
-    W = np.ones_like(X)
+    W = 4.2 * np.ones_like(X)
 
     def check_results(Estimator):
         pca1 = Estimator(2, **KWDS[Estimator]).fit(X)
@@ -61,7 +60,7 @@ def test_constant_weights():
                         pca2.explained_variance_ratio_)
 
         Y1 = pca1.transform(X)
-        Y2 = pca2.transform(X, W)
+        Y2 = pca2.transform(X, weights=W)
         assert_columns_allclose_upto_sign(Y1, Y2)
 
         X1 = pca1.inverse_transform(Y1)
@@ -72,7 +71,7 @@ def test_constant_weights():
                                           pca2.fit_transform(X, weights=W))
 
         assert_allclose(pca1.reconstruct(X),
-                        pca2.reconstruct(X, W))
+                        pca2.reconstruct(X, weights=W))
 
         assert_allclose(pca1.fit_reconstruct(X),
                         pca2.fit_reconstruct(X, weights=W))
