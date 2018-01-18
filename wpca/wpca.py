@@ -61,12 +61,20 @@ class WPCA(BaseEstimator, TransformerMixin):
         self.copy_data = copy_data
 
     def _center_and_weight(self, X, weights, fit_mean=False):
-        """Compute centered and weighted version of X.
+        """Compute centered and weighted version of X and adjust weights.
+
+        Input weights are inverse variance and adjusted weights are
+        inverse sigmas. Will produce a RuntimeWarning if any input
+        weights are negative.
 
         If fit_mean is True, then also save the mean to self.mean_
         """
         X, weights = check_array_with_weights(X, weights, dtype=float,
                                               copy=self.copy_data)
+
+        # Convert from inverse variance to inverse sigmas.
+        # See eqn. 7 of Delchambre 2015 and issue #2.
+        weights = np.sqrt(weights)
 
         if fit_mean:
             self.mean_ = weighted_mean(X, weights, axis=0)
@@ -92,7 +100,7 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -141,7 +149,7 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -174,7 +182,7 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -213,7 +221,7 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -235,7 +243,7 @@ class WPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------

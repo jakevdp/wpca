@@ -88,7 +88,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -135,7 +135,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -159,7 +159,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -202,7 +202,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -224,7 +224,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
