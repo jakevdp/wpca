@@ -122,6 +122,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
             XW = X_c * weights
             total_var = np.sum((XW ** 2).sum(0) / (weights ** 2).sum(0))
         self.explained_variance_ratio_ = (self.explained_variance_ / total_var)
+        self.n_iter_ = 1 # needed by sklearn.utils.estimator_checks
         return coeff
 
     def fit(self, X, y=None, weights=None):
