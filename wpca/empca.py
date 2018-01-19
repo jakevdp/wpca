@@ -88,7 +88,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -122,6 +122,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
             XW = X_c * weights
             total_var = np.sum((XW ** 2).sum(0) / (weights ** 2).sum(0))
         self.explained_variance_ratio_ = (self.explained_variance_ / total_var)
+        self.n_iter_ = 1 # needed by sklearn.utils.estimator_checks
         return coeff
 
     def fit(self, X, y=None, weights=None):
@@ -135,7 +136,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -159,7 +160,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -202,7 +203,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
@@ -224,7 +225,7 @@ class EMPCA(BaseEstimator, TransformerMixin):
 
         weights: array-like, shape (n_samples, n_features)
             Non-negative weights encoding the reliability of each measurement.
-            Equivalent to the inverse of the Gaussian errorbar.
+            Equivalent to the inverse variance when errors are Gaussian.
 
         Returns
         -------
