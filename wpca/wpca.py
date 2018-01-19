@@ -127,6 +127,8 @@ class WPCA(BaseEstimator, TransformerMixin):
         self.explained_variance_ = evals[::-1]
         self.explained_variance_ratio_ = evals[::-1] / covar.trace()
 
+        self.n_iter_ = 1 # needed by sklearn.utils.estimator_checks
+
     def transform(self, X, weights=None):
         """Apply dimensionality reduction on X.
 
